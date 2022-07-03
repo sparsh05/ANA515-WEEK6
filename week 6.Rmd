@@ -1,0 +1,98 @@
+---
+title: "ANA 515 Assignment Week 6"
+author: "Sparsh Kathuria"
+date: '2022-07-03'
+output: word_document
+---
+
+```{r setup, include = FALSE}
+# Install libraries
+library(tidyverse)
+library(knitr)
+library(bslib)
+library(ggplot2)
+library(stringr)
+```
+
+```{r , include = FALSE}
+#Import data 
+df <- read_csv('~/Desktop/McDaniel/Data Storage/week 6/StormEvents_details-ftp_v1.0_d1992_c20220425.csv')
+print(df)
+```
+
+```{r , include = FALSE}
+# select specific column names from dataframe
+colnames(df)
+df <- df[ , c("BEGIN_DATE_TIME","END_DATE_TIME","EPISODE_ID", "EVENT_ID",       "STATE","STATE_FIPS","CZ_NAME",
+        "CZ_TYPE","CZ_FIPS","EVENT_TYPE",
+       "DATA_SOURCE","BEGIN_LAT","BEGIN_LON",
+       "END_LAT", "END_LON" )]  
+print(df)
+
+```
+
+```{r , include = FALSE}
+# Arrange data by state ascending
+df <- df %>% arrange(STATE)
+
+```
+
+```{r , include = FALSE}
+# Change state and county names to title case
+df$STATE <- str_to_title(df$STATE)
+df$CZ_NAME <- str_to_title(df$CZ_NAME)
+df
+```
+
+```{r , include = FALSE}
+df <- filter(df, CZ_TYPE == "C")
+df <- subset (df, select = -c(CZ_TYPE))
+```
+
+```{r , include = FALSE}
+# Change state and county names to title case
+df$STATE_FIPS <- paste0("0", df$STATE_FIPS)
+df$CZ_FIPS <- paste0("0", df$CZ_FIPS)
+
+# combine state fips and cz fips columns
+df$FIPS <- paste(df$STATE_FIPS,df$CZ_FIPS, sep = "")
+```
+
+```{r , include = FALSE}
+# change column names to lower case
+names(df) <- tolower(names(df))
+df
+```
+
+```{r , include = FALSE}
+# create US states dataframe
+states <- data.frame(state.name)
+states$region <- state.region
+states$area <- state.area
+
+colnames(states)[1] <- "state"
+```
+
+```{r , include = FALSE}
+
+state_df <- df %>%
+  count(state, sort = TRUE) 
+
+```
+
+```{r , include = FALSE}
+new_df <- merge(x = states, y = state_df, by = "state")
+
+```
+
+```{r scatter-plot, echo = FALSE} 
+p <- ggplot(new_df, aes(x=area, y=n, color = region)) + geom_point()
+ p + xlab("Land Area ( square miles) ") + 
+   ylab("# of storm events in 2017")
+
+```
+
+
+
+
+
